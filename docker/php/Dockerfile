@@ -1,5 +1,9 @@
 FROM php:7.4-fpm-alpine
-LABEL maintainer="ucan-lab <info@u-can.tech>"
+LABEL maintainer="Daiki Domon <daiki.domon@todoonada.co.jp>"
+
+# For socket connection
+RUN adduser -D -H -s /bin/sh -u 101 nginx
+RUN mkdir -p /var/run/php-fpm && chown nginx:nginx /var/run/php-fpm
 
 SHELL ["/bin/ash", "-oeux", "pipefail", "-c"]
 
@@ -21,7 +25,7 @@ RUN apk update && \
     gcc=~9.2 \
     g++=~9.2 \
     make=~4.2 \
-    tzdata=2019c-r0 \
+    tzdata \
     git=~2.24 && \
   apk add --update --no-cache \
     icu-dev=~64.2 \
