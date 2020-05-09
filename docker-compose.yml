@@ -60,7 +60,7 @@ services:
       - ${DB_PORT:-13306}:3306
 
   db-testing:
-    image: mysql:8.0
+    image: mariadb:10.4
     volumes:
       - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
     tmpfs:

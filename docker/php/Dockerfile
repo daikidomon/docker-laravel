@@ -1,11 +1,12 @@
-FROM php:7.4-fpm-alpine
+FROM php:7.4-fpm-buster
 LABEL maintainer="Daiki Domon <daiki.domon@todoonada.co.jp>"
 
 # For socket connection
-RUN adduser -D -H -s /bin/sh -u 101 nginx
-RUN mkdir -p /var/run/php-fpm && chown nginx:nginx /var/run/php-fpm
+RUN addgroup --gid 101 nginx && \
+  useradd -g nginx -d /home/nginx -s /bin/bash -u 101 nginx && \
+  mkdir -p /var/run/php-fpm && chown nginx:nginx /var/run/php-fpm
 
-SHELL ["/bin/ash", "-oeux", "pipefail", "-c"]
+# SHELL ["/bin/ash", "-oeux", "pipefail", "-c"]
 
 # tinker(psysh)
 ARG PSYSH_DIR=/usr/local/share/psysh
@@ -19,23 +20,24 @@ ARG TZ
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_HOME /composer
 
-RUN apk update && \
-  apk add --update --no-cache --virtual=.build-dependencies \
-    autoconf=~2.69 \
-    gcc=~9.2 \
-    g++=~9.2 \
-    make=~4.2 \
+RUN apt-get update && \
+  apt-get install -y \
+    autoconf \
+    gcc \
+    g++ \
+    make \
     tzdata \
-    git=~2.24 && \
-  apk add --update --no-cache \
-    icu-dev=~64.2 \
-    libzip-dev=~1.5 \
-    oniguruma-dev=~6.9 && \
+    git \
+    libicu-dev \
+    libzip-dev \
+    libonig-dev \
+    zip \
+    unzip \
+    vim && \
   cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime && \
   echo ${TZ} > /etc/timezone && \
   pecl install xdebug && \
   git clone https://github.com/phpredis/phpredis.git /usr/src/php/ext/redis && \
-  apk del .build-dependencies && \
   docker-php-ext-install intl pdo_mysql mbstring zip bcmath redis && \
   docker-php-ext-enable xdebug && \
   mkdir $PSYSH_DIR && curl $PHP_MANUAL_URL -o $PSYSH_PHP_MANUAL && \
